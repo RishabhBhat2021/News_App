@@ -35,9 +35,12 @@ class NewsApp(tk.Tk):
         return self.frames[page_class]
 
 
-class StartPage(tk.Frame):
+class StartPage(tk.Frame, nd.NewsData, nd.NewsDetail):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
+        nd.NewsData.__init__(self)
+
+        self.news_articles = nd.NewsData.get_headlines(self)
 
         self.controller = controller
 
@@ -50,7 +53,7 @@ class StartPage(tk.Frame):
         self.headline_display = tk.Listbox(self, width=130, height=40, font=MEDIUM_FONT_BOLD)
         self.headline_display.pack(fill="both", expand=True, side=tk.LEFT)
 
-        for article in news_articles:
+        for article in self.news_articles:
             self.headline_display.insert(tk.END, article)
             self.headline_display.insert(tk.END, "")
 
@@ -70,16 +73,16 @@ class StartPage(tk.Frame):
         selection = widget.curselection()
         self.selected_headline = widget.get(selection[0])
 
+        article_link = nd.NewsData.get_link(self, self.selected_headline)
+
         if self.selected_headline != "":
-            detail_object = nd.NewsDetail(news_object.news[self.selected_headline])
+            nd.NewsDetail.__init__(self, article_link)
 
-            detail_textbox = self.detail_page_object.news_detail_display
+            self.detail_page_object.news_detail_display.delete(1.0, tk.END)
+            self.detail_page_object.news_detail_display.insert(tk.END, nd.NewsDetail.get_sub_heading(self) + "\n")
+            self.detail_page_object.news_detail_display.insert(tk.END, nd.NewsDetail.get_paragraphs(self) + "\n")
 
-            detail_textbox.delete(1.0, tk.END)
-            detail_textbox.insert(tk.END, detail_object.sub_heading + "\n")
-            detail_textbox.insert(tk.END, detail_object.paragraphs + "\n")
-
-            self.headline_var.set(detail_object.main_heading)
+            self.headline_var.set(nd.NewsDetail.get_main_heading(self))
 
             self.controller.show_frame(DetailPage)
 
@@ -105,7 +108,3 @@ class DetailPage(tk.Frame):
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.news_detail_display.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.news_detail_display.yview)
-
-
-news_object = nd.NewsData() 
-news_articles = news_object.get_headlines()

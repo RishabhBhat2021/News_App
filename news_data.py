@@ -2,12 +2,12 @@ from bs4 import BeautifulSoup
 
 import requests
 
-class NewsData:
-    headline_site = "https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pKVGlnQVAB?hl=en-IN&gl=IN&ceid=IN%3Aen"
-    site = "https://news.google.com"
+headline_site = "https://news.google.com/topics/CAAqJggKIiBDQkFTRWdvSUwyMHZNRFZxYUdjU0FtVnVHZ0pKVGlnQVAB?hl=en-IN&gl=IN&ceid=IN%3Aen"
+site = "https://news.google.com"
 
+class NewsData:
     def __init__(self):
-        self.request = requests.get(self.headline_site)
+        self.request = requests.get(headline_site)
         self.content = self.request.text
 
         self.soup = BeautifulSoup(self.content, 'lxml')
@@ -19,7 +19,7 @@ class NewsData:
         for article in news_articles:
             headline = article.a.text
             link = article.a.attrs['href'].strip('.')
-            article_link = f"{self.site}{link}"
+            article_link = f"{site}{link}"
 
             self.news[headline] = article_link
 
@@ -28,6 +28,7 @@ class NewsData:
 
     def get_link(self, headline):
         return self.news[headline]
+
 
 class NewsDetail:
     def __init__(self, link):
@@ -51,3 +52,12 @@ class NewsDetail:
         paragraphs_list = self.soup.find_all('p')
         for paragraph in paragraphs_list:
             self.paragraphs = self.paragraphs + paragraph.text + "\n"
+
+    def get_main_heading(self):
+        return self.main_heading
+
+    def get_sub_heading(self):
+        return self.sub_heading
+
+    def get_paragraphs(self):
+        return self.paragraphs
